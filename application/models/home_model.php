@@ -15,5 +15,14 @@ class Home_model extends CI_Model{
             return $query->result_array();
         }
     }
+    
+    public function login($data){
+        $username = $data['username'];
+        $password = md5($data['password']);
+        $sql = "SELECT username, password FROM admin WHERE username= ? AND password= ? ";
+        $query = $this->db->query($sql, array($username, $password));
+        if ( $query->num_rows() ) return $query->row()->username;
+        else return '';
+    }
 }
 ?>
