@@ -6,13 +6,36 @@ class Home extends CI_Controller {
 		parent::__construct();
 	}
     
-	public function index(){
+	public function index($num = 0){
         if ( !$this->session->userdata('admin') ) {
             redirect(site_url('home/login'));
 		}
+            
+        $data['title'] = '命令总览';
+        
         $this->load->model('home_model');
         
-        $data['results'] = $this->home_model->get_all_results();
+        $this->load->library('pagination');
+        $config['base_url'] = site_url('home/index');
+        $config['total_rows'] = $this->home_model->count_all_commands();
+        $config['per_page'] = 2;
+        $config['num_links'] = 3;
+        $config['full_tag_open'] = '<div class="pagination"><ul>';
+        $config['full_tag_close'] = '</ul></div>';
+        $config['next_link'] = '下一页 &gt;';
+        $config['prev_link'] = '&lt; 上一页';
+        $config['num_tag_open'] = '<li>';
+        $config['num_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li>';
+        $config['next_tag_close'] = '</li>';
+        $config['prev_tag_open'] = '<li>';
+        $config['prev_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '&nbsp;<li class="active"><span>';
+        $config['cur_tag_close'] = '</span></li>';
+        $this->pagination->initialize($config);
+
+        
+        $data['results'] = $this->home_model->get_all_commands($num,$config['per_page']);
         
         /*
         echo '<pre>';
