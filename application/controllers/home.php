@@ -13,6 +13,9 @@ class Home extends CI_Controller {
          
 
         $header['admin'] = $this->session->userdata('admin');
+        $header['command_status'] = 'class="active"';
+        $header['add_status'] = '';
+        
         $data['title'] = '命令总览';
         
         $this->load->model('home_model');
@@ -81,17 +84,22 @@ class Home extends CI_Controller {
     
     //添加命令的编辑页面    
     public function add(){
-        //http://prp.local/index.php/home/add
-        $this->load->view('add');
+        $data['title'] = '增加命令';
+        $header['admin'] = $this->session->userdata('admin');
+        $header['command_status'] = '';
+        $header['add_status'] = 'class="active"';
+        $this->load->view('_header',$header);
+        $this->load->view('_include');
+        $this->load->view('add',$data);
     }
     
     //添加命令的函数
     public function add_command(){
         $this->load->model('add_command_model');
-        if(empty($_POST['command'])){
+        if(empty($_POST['command_type']) or empty($_POST['target'])){
             redirect(site_url('home/add'));
         }
-        $this->add_command_model->add_command($_POST['command']);
+        $this->add_command_model->add_command($_POST['target']);
         redirect(site_url('home/add'));
     }
     

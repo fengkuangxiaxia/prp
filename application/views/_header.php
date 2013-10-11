@@ -8,12 +8,12 @@
                     <a class="brand" href="#">Android</a>
 
                     <ul class="nav">
-                        <li<?php echo '' ?>>
+                        <li <?php echo $command_status ?>>
                             <a href="<?php echo site_url('') ?>">
                                 命令总览
                             </a>
                         </li>
-                        <li<?php echo '' ?>>
+                        <li <?php echo $add_status ?>>
                             <a href="<?php echo site_url('home/add') ?>">
                                 增加命令
                             </a>
