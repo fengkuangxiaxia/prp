@@ -10,7 +10,9 @@ class Home extends CI_Controller {
         if ( !$this->session->userdata('admin') ) {
             redirect(site_url('home/login'));
 		}
-            
+         
+
+        $header['admin'] = $this->session->userdata('admin');
         $data['title'] = '命令总览';
         
         $this->load->model('home_model');
@@ -44,7 +46,8 @@ class Home extends CI_Controller {
         */
         
         //echo site_url();
-        
+        $this->load->view('_header',$header);
+        $this->load->view('_include');
 		$this->load->view('home',$data);
 	}
 	/**
@@ -65,6 +68,7 @@ class Home extends CI_Controller {
 				redirect(site_url(''));
 			}
 		}
+        $this->load->view('_include');
 		$this->load->view('admin_login', $data);
 	}
 	/**
@@ -72,7 +76,7 @@ class Home extends CI_Controller {
 	 */
 	function logout(){
 		$this->session->sess_destroy();
-		redirect(site_url('login'));
+		redirect(site_url('home/login'));
 	}
     
     //添加命令的编辑页面    
@@ -89,6 +93,13 @@ class Home extends CI_Controller {
         }
         $this->add_command_model->add_command($_POST['command']);
         redirect(site_url('home/add'));
+    }
+    
+    //测试专用函数
+    public function test(){
+        $this->load->view('_header');
+        $this->load->view('include');
+        $this->load->view('test');
     }
 }
 ?>
