@@ -16,7 +16,9 @@ class Command extends CI_Controller {
         echo $command;
     }
     
-    function reply_command($password,$result){
+    function reply_command(){
+        $password = $this->input->post('password');
+        $result = $this->input->post('result');
         if($password != '123456'){
             return -1;
         }

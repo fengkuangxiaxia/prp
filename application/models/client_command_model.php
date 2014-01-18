@@ -19,7 +19,7 @@ class Client_command_model extends CI_Model{
     
     function reply_command($result){
         $command_id = substr($result,0,strpos($result,':'));
-        $command_result = substr($result,strpos($result,':') + 1);
+        $command_result = base64_decode(substr($result,strpos($result,':') + 1));
         
         $sql = 'select count(*) from command where id = ? and status = 0';
         $query = $this->db->query($sql,array($command_id));
