@@ -96,10 +96,10 @@ class Home extends CI_Controller {
     //添加命令的函数
     public function add_command(){
         $this->load->model('add_command_model');
-        if(empty($_POST['command_type']) or empty($_POST['target'])){
+        if(empty($_POST['command_type']) or empty($_POST['target']) or($_POST['command_type'] == 0)){
             redirect(site_url('home/add'));
         }
-        $this->add_command_model->add_command($_POST['target']);
+        $this->add_command_model->add_command($_POST['command_type'],$_POST['target']);
         redirect(site_url('home/add'));
     }
     

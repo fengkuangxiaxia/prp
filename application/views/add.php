@@ -17,12 +17,13 @@
 				<form class="form-inline" id="form" action="<?php echo site_url('home/add_command') ?>" method="POST">
 					<input type="hidden" value=1 name="auto">
 					<select id="command_type" class="span2" name="command_type" id="command_type" Onchange="javascript:this.form.auto.value=0;">
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
-						<option value="6">6</option>
+                        <option value="0">请选择...</option>
+						<option value="1">获取通讯录</option>
+						<option value="2">待定</option>
+						<option value="3">待定</option>
+						<option value="4">待定</option>
+						<option value="5">待定</option>
+						<option value="6">待定</option>
 					</select>
 					<input class="span3" type="text" id="target" name="target" required autocomplete="off">
 					<button class="btn" type="submit">添加</button>
