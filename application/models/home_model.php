@@ -19,7 +19,8 @@ class Home_model extends CI_Model{
     public function count_all_commands(){
         $sql = 'select count(*) from command';
         $query = $this->db->query($sql);
-        return $query->row_array()['count(*)'];
+        $temp = $query->row_array();
+        return $temp['count(*)'];
     }
     
     public function login($data){
