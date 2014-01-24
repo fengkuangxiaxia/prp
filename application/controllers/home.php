@@ -23,7 +23,7 @@ class Home extends CI_Controller {
         $this->load->library('pagination');
         $config['base_url'] = site_url('home/index');
         $config['total_rows'] = $this->home_model->count_all_commands();
-        $config['per_page'] = 2;
+        $config['per_page'] = 10;
         $config['num_links'] = 3;
         $config['full_tag_open'] = '<div class="pagination"><ul>';
         $config['full_tag_close'] = '</ul></div>';
