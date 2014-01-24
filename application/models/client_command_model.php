@@ -13,7 +13,7 @@ class Client_command_model extends CI_Model{
             return $command['id'].':'.$command['command'];
         }
         else{
-            return null;
+            return 'noCommand';
         }
     }
     
