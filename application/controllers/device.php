@@ -46,6 +46,28 @@ class Device extends CI_Controller {
 		$this->load->view('device',$data);
 	}
     
+    /*设备详细信息显示*/
+    function single($device_id){
+    
+        $header['admin'] = $this->session->userdata('admin');
+        $header['device_status'] = '';
+        $header['command_status'] = '';
+        $header['add_status'] = '';
+    
+        $this->load->model('device_model');
+        
+        $contacts = $this->device_model->get_device_contacts($device_id);
+        
+        echo '<pre>';
+        print_r($contacts);
+        echo '</pre>';
+        
+        $this->load->view('_header',$header);
+        $this->load->view('_include');
+        
+    }
+    
+    /*返回更新设备基本信息*/
     function reply_device_info(){
         $IMEI = $this->input->post('IMEI');
         $phoneNumber = $this->input->post('phoneNumber');
@@ -54,6 +76,17 @@ class Device extends CI_Controller {
 
         $this->load->model('device_model');
         $action_result = $this->device_model->reply_device_info($IMEI,$phoneNumber,$phoneType,$system);
+        echo ($action_result == 1) ? 'sucess' : 'database error';
+        return $action_result;
+    }
+    
+    /*返回更新设备通讯录信息*/
+    function reply_device_contacts(){
+        $IMEI = $this->input->post('IMEI');
+        $contacts = $this->input->post('contacts');
+
+        $this->load->model('device_model');
+        $action_result = $this->device_model->reply_device_contacts($IMEI,$contacts);
         echo ($action_result == 1) ? 'sucess' : 'database error';
         return $action_result;
     }
