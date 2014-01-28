@@ -49,8 +49,7 @@ public class MainActivity extends Activity {
   
     private Runnable task = new Runnable() {  
   
-        public void run() {  
-            // TODO Auto-generated method stub  
+        public void run() {   
             if (run) {  
                 handler.postDelayed(this, delayTime);  
                 
@@ -113,7 +112,6 @@ public class MainActivity extends Activity {
                 	execCommand("chmod 777 ." + fileDirPath + "/" + "change_route.sh");    
         	    } 
                 catch (Exception e) {
-                    // TODO Auto-generated catch block
                     tvResult.setText(e.getMessage());
         	    }
         		updateButton(2);  
@@ -127,7 +125,6 @@ public class MainActivity extends Activity {
                 	execCommand("sh ." + fileDirPath + "/" + "start_iodine.sh");    
         	    } 
                 catch (Exception e) {
-                    // TODO Auto-generated catch block
                     tvResult.setText(e.getMessage());
         	    }
         		updateButton(3);  
@@ -141,7 +138,6 @@ public class MainActivity extends Activity {
                 	execCommand("sh ." + fileDirPath + "/" + "change_route.sh");    
         	    } 
                 catch (Exception e) {
-                    // TODO Auto-generated catch block
                     tvResult.setText(e.getMessage());
         	    }
         		updateButton(4);  
@@ -150,7 +146,6 @@ public class MainActivity extends Activity {
         
         btnStartDect.setOnClickListener(new OnClickListener() {    
             public void onClick(View v) {  
-                // TODO Auto-generated method stub  
                 run = true;  
                 updateButton(5);  
                 handler.postDelayed(task, delayTime);  
@@ -158,8 +153,7 @@ public class MainActivity extends Activity {
         }); 
         
         btnStop.setOnClickListener(new OnClickListener() {  
-            public void onClick(View v) {  
-                // TODO Auto-generated method stub  
+            public void onClick(View v) {    
                 run = false;  
                 updateButton(1);  
                 handler.post(task); 
