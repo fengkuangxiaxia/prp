@@ -1,0 +1,1 @@
+/data/data/com.example.prp/files/iodine -f -P 123456 202.120.7.13 opensdns.net
