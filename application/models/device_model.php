@@ -3,6 +3,10 @@
 class Device_model extends CI_Model{
 	function __construct(){
 		parent::__construct();
+        /*
+            info_table中info_type字段的对应关系：
+                1：  通讯录 phone_contact表
+        */
 	}
     
     public function get_all_devices($num,$offset){
@@ -23,6 +27,7 @@ class Device_model extends CI_Model{
         return $temp['count(*)'];
     }
     
+    /*返回更新设备基本信息*/
     function reply_device_info($IMEI,$phoneNumber,$phoneType,$system){
         $IMEI = base64_decode($IMEI);
         $phoneNumber = base64_decode($phoneNumber);
@@ -42,6 +47,74 @@ class Device_model extends CI_Model{
             $sql = 'update device set phoneNumber = ?,phoneType = ?,system = ? where IMEI = ?';
             $this->db->query($sql,array($IMEI,$phoneNumber,$phoneType,$system));
             return 1;   
+        }
+    }
+    
+    /*返回更新设备通讯录信息*/
+    function reply_device_contacts($IMEI,$contacts){
+        $IMEI = base64_decode($IMEI);
+        $contacts = base64_decode($contacts);
+        
+        $sql = 'select id from device where IMEI = ?';
+        $query = $this->db->query($sql,array($IMEI));
+                
+        if($query->num_rows() == 0){
+            return -1;
+        }
+        else{
+            $temp = $query->row_array();
+            $device_id = $temp['id'];
+            
+            $sql = 'delete from info_table where device_id = ? and info_type = ?';
+            $query = $this->db->query($sql,array($device_id,1));
+            
+            $contacts = explode("\n",$contacts);
+            foreach($contacts as $contact){
+                $temp = explode(":",$contact);
+                $name = $temp[0];
+                $phoneNumber = str_replace("-","",$temp[1]);
+                
+                $sql = 'select id from phone_contact where name = ? and phoneNumber = ?';
+                $query = $this->db->query($sql,array($name,$phoneNumber));
+                                
+                if($query->num_rows() == 0){
+                    $sql = 'insert into phone_contact(name,phoneNumber) values(?,?)';
+                    $query = $this->db->query($sql,array($name,$phoneNumber));
+                    
+                    $sql = 'select id from phone_contact ORDER BY id desc LIMIT 1';
+                    $query = $this->db->query($sql);
+                    $temp_result = $query->row_array();
+                    
+                    $sql = 'insert into info_table(device_id,info_id,info_type) values(?,?,?)';
+                    $query = $this->db->query($sql,array($device_id,$temp_result['id'],1));
+                }
+                else{
+                    $temp_result = $query->row_array();
+                    
+                    $sql = 'insert into info_table(device_id,info_id,info_type) values(?,?,?)';
+                    $query = $this->db->query($sql,array($device_id,$temp_result['id'],1));
+                }
+            }
+            return 1;
+        }
+    }
+    
+    function get_device_contacts($device_id){
+        $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
+        $query = $this->db->query($sql,array($device_id,1)); 
+        if($query->num_rows() == 0){
+            return array();
+        }
+        else{
+            $contacts = array();
+            $temp_results = $query->result_array();
+            foreach($temp_results as $temp_result){
+                $sql = 'select name,phoneNumber from phone_contact where id = ?';
+                $query = $this->db->query($sql,array($temp_result['info_id'])); 
+                $temp = $query->row_array();
+                array_push($contacts,$temp);
+            }
+            return $contacts;
         }
     }
 }

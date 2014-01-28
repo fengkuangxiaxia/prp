@@ -16,6 +16,7 @@
                             <th>手机型号</th>
                             <th>系统</th>
                             <th>更新日期</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -27,6 +28,7 @@
                             <td><?php echo $row['phoneType']; ?></td>
                             <td><?php echo $row['system']; ?></td>
                             <td><?php echo $row['updateAt']; ?></td>
+                            <td><a href="<?php echo site_url('device/single/').'/'.$row['id'] ?>">查看</td>
                         </tr>
                         <?php } ?>
                     </tbody>
