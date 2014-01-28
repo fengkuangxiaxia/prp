@@ -9,7 +9,7 @@ class Command extends CI_Controller {
     function index(){
         redirect(site_url('command/get_command'));
     }
-    
+  
     function get_command(){
         $this->load->model('client_command_model');
         $command = $this->client_command_model->get_command();
