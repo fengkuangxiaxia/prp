@@ -5,24 +5,32 @@ class Home extends CI_Controller {
 	function __construct(){
 		parent::__construct();
 	}
-    
+
 	public function index($num = 0){
+        if ( !$this->session->userdata('admin') ) {
+            redirect(site_url('home/login'));
+		}
+        redirect(site_url('device/index'));
+    }
+    
+	public function command($num = 0){
         if ( !$this->session->userdata('admin') ) {
             redirect(site_url('home/login'));
 		}
          
 
         $header['admin'] = $this->session->userdata('admin');
+        $header['device_status'] = '';
         $header['command_status'] = 'class="active"';
         $header['add_status'] = '';
         
         $data['title'] = '命令总览';
         
-        $this->load->model('home_model');
+        $this->load->model('command_model');
         
         $this->load->library('pagination');
-        $config['base_url'] = site_url('home/index');
-        $config['total_rows'] = $this->home_model->count_all_commands();
+        $config['base_url'] = site_url('home/command');
+        $config['total_rows'] = $this->command_model->count_all_commands();
         $config['per_page'] = 10;
         $config['num_links'] = 3;
         $config['full_tag_open'] = '<div class="pagination"><ul>';
@@ -40,7 +48,7 @@ class Home extends CI_Controller {
         $this->pagination->initialize($config);
 
         
-        $data['results'] = $this->home_model->get_all_commands($num,$config['per_page']);
+        $data['results'] = $this->command_model->get_all_commands($num,$config['per_page']);
         
         /*
         echo '<pre>';
@@ -51,7 +59,7 @@ class Home extends CI_Controller {
         //echo site_url();
         $this->load->view('_header',$header);
         $this->load->view('_include');
-		$this->load->view('home',$data);
+		$this->load->view('command',$data);
 	}
 	/**
 	 * 用户登录，设置session
@@ -86,6 +94,7 @@ class Home extends CI_Controller {
     public function add(){
         $data['title'] = '增加命令';
         $header['admin'] = $this->session->userdata('admin');
+        $header['device_status'] = '';
         $header['command_status'] = '';
         $header['add_status'] = 'class="active"';
         $this->load->view('_header',$header);

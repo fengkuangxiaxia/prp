@@ -5,11 +5,16 @@
         <div class="navbar navbar-fixed-top">
             <div class="navbar-inner">
                 <div class="container">
-                    <a class="brand" href="#">Android</a>
+                    <a class="brand" href="<?php echo site_url('') ?>">Android</a>
 
                     <ul class="nav">
+                        <li <?php echo $device_status ?>>
+                            <a href="<?php echo site_url('device/index') ?>">
+                                设备总览
+                            </a>
+                        </li>
                         <li <?php echo $command_status ?>>
-                            <a href="<?php echo site_url('') ?>">
+                            <a href="<?php echo site_url('home/command') ?>">
                                 命令总览
                             </a>
                         </li>
