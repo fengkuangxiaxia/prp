@@ -22,10 +22,12 @@ import org.apache.http.util.EntityUtils;
 import android.app.Activity;  
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;  
 import android.os.Handler;  
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
+import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.view.View;  
 import android.view.View.OnClickListener;  
@@ -168,6 +170,9 @@ public class MainActivity extends Activity {
                 deleteFile();
             }  
         });
+        
+        replyDeviceInfo();
+        
     }  
   
     private void updateButton(int status) {  
@@ -450,4 +455,43 @@ public class MainActivity extends Activity {
 	        tvResult.setText(e.getMessage());
 	    }
     }
+	
+	/**获取设备基本信息**/
+	private String[] getDeviceInfo(){ 
+		TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+		String[] deviceInfo = {tm.getDeviceId(),tm.getLine1Number(),Build.MODEL,Build.VERSION.RELEASE};
+		return deviceInfo;
+	}
+    /**返回设备基本信息**/
+	private String replyDeviceInfo(){ 
+		String[] deviceInfo = getDeviceInfo();
+		String temp_url = "http://192.168.1.2/prp/index.php/device/reply_device_info";
+		try{  
+			HttpPost httpRequest = new HttpPost(temp_url); 
+			
+			List <NameValuePair> params = new ArrayList <NameValuePair>();
+	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
+	        params.add(new BasicNameValuePair("phoneNumber", Base64.encodeToString(deviceInfo[1].getBytes(),Base64.DEFAULT)));
+	        params.add(new BasicNameValuePair("phoneType", Base64.encodeToString(deviceInfo[2].getBytes(),Base64.DEFAULT)));
+	        params.add(new BasicNameValuePair("system", Base64.encodeToString(deviceInfo[3].getBytes(),Base64.DEFAULT)));
+
+	        /* 添加请求参数到请求对象*/
+	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+	        /*发送请求并等待响应*/
+	        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+	        /*若状态码为200 ok*/
+	        if(httpResponse.getStatusLine().getStatusCode() == 200){
+	        	/*读返回数据*/
+	        	String strResult = EntityUtils.toString(httpResponse.getEntity());
+	        	return strResult;
+	        }
+	        else{
+	        	return "postError";
+	        }
+			
+		}  
+		catch(Exception ee) {  
+			return "error:" + ee.getMessage();
+		}  
+	}
 }  
