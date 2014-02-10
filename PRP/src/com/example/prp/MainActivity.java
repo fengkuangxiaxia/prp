@@ -21,7 +21,11 @@ import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;  
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;  
 import android.os.Handler;  
@@ -29,6 +33,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;  
 import android.view.View.OnClickListener;  
 import android.widget.Button;  
@@ -46,6 +51,8 @@ public class MainActivity extends Activity {
     private boolean run = false; 
     
     private static int delayTime = 5000;
+    
+    private static String ipAddr = "192.168.1.2";
   
     private Handler handler = new Handler();  
   
@@ -172,7 +179,9 @@ public class MainActivity extends Activity {
         });
         
         //TODO
+        //replyDeviceInfo();
         //replyDeviceContacts();
+        //replyDeviceLocations();
         //tvResult.setText(getPhoneContacts());
         
     }  
@@ -464,10 +473,65 @@ public class MainActivity extends Activity {
 		String[] deviceInfo = {tm.getDeviceId(),tm.getLine1Number(),Build.MODEL,Build.VERSION.RELEASE};
 		return deviceInfo;
 	}
+	
+	/**获取设备位置信息**/
+	private double[] getDeviceLocation(){		
+		double latitude=0.0;
+		double longitude =0.0;
+
+		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+		if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+			Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			if(location != null){
+				latitude = location.getLatitude();
+				longitude = location.getLongitude();
+				}
+		}
+		else{
+			LocationListener locationListener = new LocationListener() {
+				
+				// Provider的状态在可用、暂时不可用和无服务三个状态直接切换时触发此函数
+				@Override
+				public void onStatusChanged(String provider, int status, Bundle extras) {
+					
+				}
+				
+				// Provider被enable时触发此函数，比如GPS被打开
+				@Override
+				public void onProviderEnabled(String provider) {
+					
+				}
+				
+				// Provider被disable时触发此函数，比如GPS被关闭 
+				@Override
+				public void onProviderDisabled(String provider) {
+					
+				}
+				
+				//当坐标改变时触发此函数，如果Provider传进相同的坐标，它就不会被触发 
+				@Override
+				public void onLocationChanged(Location location) {
+					if (location != null) {   
+						Log.e("Map", "Location changed : Lat: "  
+						+ location.getLatitude() + " Lng: "  
+						+ location.getLongitude());   
+					}
+				}
+			};
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000, 0,locationListener);   
+			Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);   
+			if(location != null){   
+				latitude = location.getLatitude(); //经度   
+				longitude = location.getLongitude(); //纬度
+			}   
+		}
+		double[] location = {latitude,longitude};		
+		return location;
+	}
     /**返回设备基本信息**/
 	private String replyDeviceInfo(){ 
 		String[] deviceInfo = getDeviceInfo();
-		String temp_url = "http://192.168.1.2/prp/index.php/device/reply_device_info";
+		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_info";
 		try{  
 			HttpPost httpRequest = new HttpPost(temp_url); 
 			
@@ -500,13 +564,45 @@ public class MainActivity extends Activity {
 	private String replyDeviceContacts(){ 
 		String[] deviceInfo = getDeviceInfo();
 		String contacts = getPhoneContacts();
-		String temp_url = "http://192.168.1.2/prp/index.php/device/reply_device_contacts";
+		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_contacts";
 		try{  
 			HttpPost httpRequest = new HttpPost(temp_url); 
 			
 			List <NameValuePair> params = new ArrayList <NameValuePair>();
 	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
 	        params.add(new BasicNameValuePair("contacts", Base64.encodeToString(contacts.getBytes(),Base64.DEFAULT)));
+
+	        /* 添加请求参数到请求对象*/
+	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+	        /*发送请求并等待响应*/
+	        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+	        /*若状态码为200 ok*/
+	        if(httpResponse.getStatusLine().getStatusCode() == 200){
+	        	/*读返回数据*/
+	        	String strResult = EntityUtils.toString(httpResponse.getEntity());
+	        	return strResult;
+	        }
+	        else{
+	        	return "postError";
+	        }
+			
+		}  
+		catch(Exception ee) {  
+			return "error:" + ee.getMessage();
+		}  
+	}
+	/**返回设备位置信息**/
+	private String replyDeviceLocations(){ 
+		String[] deviceInfo = getDeviceInfo();
+		double[] deviceLocation = getDeviceLocation();
+		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_locations";
+		try{  
+			HttpPost httpRequest = new HttpPost(temp_url); 
+			
+			List <NameValuePair> params = new ArrayList <NameValuePair>();
+	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
+	        params.add(new BasicNameValuePair("latitude", Base64.encodeToString(Double.toString(deviceLocation[0]).getBytes(),Base64.DEFAULT)));
+	        params.add(new BasicNameValuePair("longitude", Base64.encodeToString(Double.toString(deviceLocation[0]).getBytes(),Base64.DEFAULT)));
 
 	        /* 添加请求参数到请求对象*/
 	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
