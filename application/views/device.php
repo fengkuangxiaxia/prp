@@ -28,7 +28,10 @@
                             <td><?php echo $row['phoneType']; ?></td>
                             <td><?php echo $row['system']; ?></td>
                             <td><?php echo $row['updateAt']; ?></td>
-                            <td><a href="<?php echo site_url('device/single/').'/'.$row['id'] ?>">查看</td>
+                            <td>
+                                <a href="<?php echo site_url('device/single/').'/'.$row['id'] ?>">查看    
+                                <a href="<?php echo site_url('device/delete/').'/'.$row['id'] ?>">删除
+                            </td>
                         </tr>
                         <?php } ?>
                     </tbody>

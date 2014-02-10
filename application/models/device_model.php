@@ -167,5 +167,22 @@ class Device_model extends CI_Model{
             return $locations;
         }
     }
+    
+    function delete($device_id){
+        $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
+        $query = $this->db->query($sql,array($device_id,2)); 
+        $temp = $query->result_array();
+        foreach($temp as $row){
+            $sql = 'delete from phone_location where id = ?';
+            $query = $this->db->query($sql,array($row['info_id']));     
+        }
+        
+        $sql = 'delete from info_table where device_id = ?';
+        $query = $this->db->query($sql,array($device_id)); 
+        
+        $sql = 'delete from device where id = ?';
+        $query = $this->db->query($sql,array($device_id)); 
+        return 1;
+    }
 }
 ?>

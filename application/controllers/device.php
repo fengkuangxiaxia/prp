@@ -109,6 +109,15 @@ class Device extends CI_Controller {
         $action_result = $this->device_model->reply_device_locations($IMEI,$latitude,$longitude);
         echo ($action_result == 1) ? 'sucess' : 'database error';
         return $action_result;
-    }    
+    }   
+
+    /*删除*/
+    function delete($device_id){    
+        $this->load->model('device_model');
+        $action_result = $this->device_model->delete($device_id);
+        echo ($action_result == 1) ? 'sucess' : 'database error';
+        redirect(site_url('device'));
+        return $action_result;
+    }
 }
 ?>
