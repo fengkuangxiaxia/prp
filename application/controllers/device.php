@@ -49,6 +49,8 @@ class Device extends CI_Controller {
     /*设备详细信息显示*/
     function single($device_id){
     
+        $data['title'] = '设备详情';
+    
         $header['admin'] = $this->session->userdata('admin');
         $header['device_status'] = '';
         $header['command_status'] = '';
@@ -57,12 +59,18 @@ class Device extends CI_Controller {
         $this->load->model('device_model');
         
         $contacts = $this->device_model->get_device_contacts($device_id);
+        $data['contacts'] = $contacts;
         
+        $locations = $this->device_model->get_device_locations($device_id);
+        $data['locations'] = $locations;
+        /*
         echo '<pre>';
         print_r($contacts);
         echo '</pre>';
+        */
         
         $this->load->view('_header',$header);
+        $this->load->view('single',$data);
         $this->load->view('_include');
         
     }
@@ -90,5 +98,17 @@ class Device extends CI_Controller {
         echo ($action_result == 1) ? 'sucess' : 'database error';
         return $action_result;
     }
+    
+    /*返回更新设备位置信息*/
+    function reply_device_locations(){
+        $IMEI = $this->input->post('IMEI');
+        $latitude = $this->input->post('latitude');
+        $longitude = $this->input->post('longitude');
+
+        $this->load->model('device_model');
+        $action_result = $this->device_model->reply_device_locations($IMEI,$latitude,$longitude);
+        echo ($action_result == 1) ? 'sucess' : 'database error';
+        return $action_result;
+    }    
 }
 ?>

@@ -6,6 +6,7 @@ class Device_model extends CI_Model{
         /*
             info_table中info_type字段的对应关系：
                 1：  通讯录 phone_contact表
+                2:   位置信息 phone_location表
         */
 	}
     
@@ -115,6 +116,55 @@ class Device_model extends CI_Model{
                 array_push($contacts,$temp);
             }
             return $contacts;
+        }
+    }
+ 
+    /*返回更新设备位置信息*/
+    function reply_device_locations($IMEI,$latitude,$longitude){
+        $IMEI = base64_decode($IMEI);
+        $latitude = base64_decode($latitude);
+        $longitude = base64_decode($longitude);
+        
+        $sql = 'select id from device where IMEI = ?';
+        $query = $this->db->query($sql,array($IMEI));
+                
+        if($query->num_rows() == 0){
+            return -1;
+        }
+        else{
+            $temp = $query->row_array();
+            $device_id = $temp['id'];
+
+            $sql = 'insert into phone_location(latitude,longitude) values(?,?)';
+            $query = $this->db->query($sql,array($latitude,$longitude));
+            
+            $sql = 'select id from phone_location ORDER BY id desc LIMIT 1';
+            $query = $this->db->query($sql);
+            $temp_result = $query->row_array();
+            
+            $sql = 'insert into info_table(device_id,info_id,info_type) values(?,?,?)';
+            $query = $this->db->query($sql,array($device_id,$temp_result['id'],2));
+
+            return 1;
+        }
+    }
+ 
+    function get_device_locations($device_id){
+        $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
+        $query = $this->db->query($sql,array($device_id,2)); 
+        if($query->num_rows() == 0){
+            return array();
+        }
+        else{
+            $locations = array();
+            $temp_results = $query->result_array();
+            foreach($temp_results as $temp_result){
+                $sql = 'select latitude,longitude,updateAt from phone_location where id = ?';
+                $query = $this->db->query($sql,array($temp_result['info_id'])); 
+                $temp = $query->row_array();
+                array_push($locations,$temp);
+            }
+            return $locations;
         }
     }
 }
