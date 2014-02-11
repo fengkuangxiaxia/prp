@@ -72,14 +72,19 @@
                           mapTypeId: google.maps.MapTypeId.ROADMAP
                         }
                         var map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
-                        /*
-                        var marker = new google.maps.Marker({
-                            position: myLatlng, 
-                            map: map,
-                            title:"Hello World!"
-                        });
-                        */
+                        
+                        // 线条设置
+                        var polyOptions = {
+                          strokeColor: '#000000',    // 颜色
+                          strokeOpacity: 1.0,    // 透明度
+                          strokeWeight: 2    // 宽度
+                        }
+                        poly = new google.maps.Polyline(polyOptions);
+                        poly.setMap(map);    // 装载
+                        
                         for(var i in markers){
+                            var path = poly.getPath();    //获取线条的坐标
+                            path.push(new google.maps.LatLng(markers[i]["latitude"],markers[i]["longitude"]));    //为线条添加标记坐标
                             var marker = new google.maps.Marker({
                                 position: new google.maps.LatLng(markers[i]["latitude"],markers[i]["longitude"]), 
                                 map: map,
