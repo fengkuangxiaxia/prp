@@ -63,16 +63,28 @@ class Device extends CI_Controller {
         
         $locations = $this->device_model->get_device_locations($device_id);
         $data['locations'] = $locations;
+        
+        $data['device_id'] = $device_id;
         /*
         echo '<pre>';
         print_r($contacts);
         echo '</pre>';
         */
         
+        $this->load->view('_include');
         $this->load->view('_header',$header);
         $this->load->view('single',$data);
-        $this->load->view('_include');
         
+        
+    }
+    
+    /*获取设备位置信息*/
+    function ajax_location($device_id){
+        $this->load->model('device_model');
+        $locations = $this->device_model->get_device_locations($device_id);
+        $center = $this->device_model->get_device_locations_center($locations);
+        $json = json_encode(array('locations'=>$locations,'center'=>$center));
+        echo $json;
     }
     
     /*返回更新设备基本信息*/

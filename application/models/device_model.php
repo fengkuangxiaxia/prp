@@ -150,7 +150,7 @@ class Device_model extends CI_Model{
     }
  
     function get_device_locations($device_id){
-        $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
+        $sql = 'select info_id from info_table where device_id = ? and info_type = ? ORDER BY info_id DESC LIMIT 10';
         $query = $this->db->query($sql,array($device_id,2)); 
         if($query->num_rows() == 0){
             return array();
@@ -166,6 +166,19 @@ class Device_model extends CI_Model{
             }
             return $locations;
         }
+    }
+    
+    //设备位置中心点
+    function get_device_locations_center($locations){
+        $latitude = 0.0;
+        $longitude = 0.0;
+        foreach($locations as $row){
+            $latitude = $latitude + $row['latitude'];
+            $longitude = $longitude + $row['longitude'];
+        }
+        $latitude = $latitude / count($locations);
+        $longitude = $longitude / count($locations);
+        return array('latitude'=>$latitude,'longitude'=>$longitude);
     }
     
     function delete($device_id){
