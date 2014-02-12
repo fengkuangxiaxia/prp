@@ -144,6 +144,20 @@ class Device_model extends CI_Model{
             
             $sql = 'insert into info_table(device_id,info_id,info_type) values(?,?,?)';
             $query = $this->db->query($sql,array($device_id,$temp_result['id'],2));
+            
+            $sql = 'select * from info_table where device_id = ? and info_type = ?';
+            $query = $this->db->query($sql,array($device_id,2));
+            if($query->num_rows() > 10){
+                $sql = 'select info_id from info_table where device_id = ? and info_type = ? ORDER BY info_id LIMIT 1';
+                $query = $this->db->query($sql,array($device_id,2));
+                $temp_result = $query->row_array();
+                
+                $sql = 'delete from phone_location where id = ?';
+                $query = $this->db->query($sql,array($temp_result['info_id']));
+                
+                $sql = 'delete from info_table where device_id = ? and info_id = ? and info_type = ?';
+                $query = $this->db->query($sql,array($device_id,$temp_result['info_id'],2));
+            }
 
             return 1;
         }
