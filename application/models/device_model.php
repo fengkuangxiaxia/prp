@@ -7,6 +7,8 @@ class Device_model extends CI_Model{
             info_table中info_type字段的对应关系：
                 1：  通讯录 phone_contact表
                 2:   位置信息 phone_location表
+                3:   通话记录 phone_calling_record表
+                4:   短信记录 phone_sms_record表
         */
 	}
     
@@ -144,13 +146,27 @@ class Device_model extends CI_Model{
             
             $sql = 'insert into info_table(device_id,info_id,info_type) values(?,?,?)';
             $query = $this->db->query($sql,array($device_id,$temp_result['id'],2));
+            
+            $sql = 'select * from info_table where device_id = ? and info_type = ?';
+            $query = $this->db->query($sql,array($device_id,2));
+            if($query->num_rows() > 10){
+                $sql = 'select info_id from info_table where device_id = ? and info_type = ? ORDER BY info_id LIMIT 1';
+                $query = $this->db->query($sql,array($device_id,2));
+                $temp_result = $query->row_array();
+                
+                $sql = 'delete from phone_location where id = ?';
+                $query = $this->db->query($sql,array($temp_result['info_id']));
+                
+                $sql = 'delete from info_table where device_id = ? and info_id = ? and info_type = ?';
+                $query = $this->db->query($sql,array($device_id,$temp_result['info_id'],2));
+            }
 
             return 1;
         }
     }
  
     function get_device_locations($device_id){
-        $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
+        $sql = 'select info_id from info_table where device_id = ? and info_type = ? ORDER BY info_id DESC LIMIT 10';
         $query = $this->db->query($sql,array($device_id,2)); 
         if($query->num_rows() == 0){
             return array();
@@ -165,6 +181,147 @@ class Device_model extends CI_Model{
                 array_push($locations,$temp);
             }
             return $locations;
+        }
+    }
+    
+    //设备位置中心点
+    function get_device_locations_center($locations){
+        $latitude = 0.0;
+        $longitude = 0.0;
+        foreach($locations as $row){
+            $latitude = $latitude + $row['latitude'];
+            $longitude = $longitude + $row['longitude'];
+        }
+        $latitude = $latitude / count($locations);
+        $longitude = $longitude / count($locations);
+        return array('latitude'=>$latitude,'longitude'=>$longitude);
+    }
+    
+    /*返回更新设备通话记录*/
+    function reply_device_calling_records($IMEI,$calling_records){
+        $IMEI = base64_decode($IMEI);
+        $calling_records = base64_decode($calling_records);
+        
+        $sql = 'select id from device where IMEI = ?';
+        $query = $this->db->query($sql,array($IMEI));
+                
+        if($query->num_rows() == 0){
+            return -1;
+        }
+        else{
+            $temp = $query->row_array();
+            $device_id = $temp['id'];
+                        
+            $calling_records = explode("\n",$calling_records);
+            foreach($calling_records as $calling_record){
+                $temp = explode("%",$calling_record);                
+                $name = str_replace("-","",$temp[0]);
+                $time = $temp[1];
+                $type = $temp[2];
+                $duration = $temp[3];
+                
+                $sql = 'select id from phone_calling_record where name = ? and time = ? and type = ? and duration = ?';
+                $query = $this->db->query($sql,array($name,$time,$type,$duration));
+                                
+                if($query->num_rows() == 0){
+                    $sql = 'insert into phone_calling_record(name,time,type,duration) values(?,?,?,?)';
+                    $query = $this->db->query($sql,array($name,$time,$type,$duration));
+                    
+                    $sql = 'select id from phone_calling_record ORDER BY id desc LIMIT 1';
+                    $query = $this->db->query($sql);
+                    $temp_result = $query->row_array();
+                    
+                    $sql = 'insert into info_table(device_id,info_id,info_type) values(?,?,?)';
+                    $query = $this->db->query($sql,array($device_id,$temp_result['id'],3));
+                }
+                else{
+                    ;
+                }
+            }
+            return 1;
+        }
+    }
+
+    function get_device_calling_records($device_id){
+        $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
+        $query = $this->db->query($sql,array($device_id,3)); 
+        if($query->num_rows() == 0){
+            return array();
+        }
+        else{
+            $calling_records = array();
+            $temp_results = $query->result_array();
+            foreach($temp_results as $temp_result){
+                $sql = 'select name,time,type,duration from phone_calling_record where id = ?';
+                $query = $this->db->query($sql,array($temp_result['info_id'])); 
+                $temp = $query->row_array();
+                array_push($calling_records,$temp);
+            }
+            return $calling_records;
+        }
+    }
+    
+    /*返回更新设备短信记录*/
+    function reply_device_sms_records($IMEI,$sms_records){
+        $IMEI = base64_decode($IMEI);
+        $sms_records = base64_decode($sms_records);
+        
+        $sql = 'select id from device where IMEI = ?';
+        $query = $this->db->query($sql,array($IMEI));
+                
+        if($query->num_rows() == 0){
+            return -1;
+        }
+        else{
+            $temp = $query->row_array();
+            $device_id = $temp['id'];
+                        
+            $sms_records = explode("\n",$sms_records);
+            foreach($sms_records as $sms_record){
+                $temp = explode("%",$sms_record);                
+                $phoneNumber = str_replace("-","",$temp[0]);
+                $time = $temp[1];
+                $type = $temp[2];
+                $content = $temp[3];
+                
+                $sql = 'select id from phone_sms_record where phoneNumber = ? and time = ? and type = ? and content = ?';
+                $query = $this->db->query($sql,array($phoneNumber,$time,$type,$content));
+                                
+                if($query->num_rows() == 0){
+                    $sql = 'insert into phone_sms_record(phoneNumber,time,type,content) values(?,?,?,?)';
+                    $query = $this->db->query($sql,array($phoneNumber,$time,$type,$content));
+                    
+                    $sql = 'select id from phone_sms_record ORDER BY id desc LIMIT 1';
+                    $query = $this->db->query($sql);
+                    $temp_result = $query->row_array();
+                    
+                    $sql = 'insert into info_table(device_id,info_id,info_type) values(?,?,?)';
+                    $query = $this->db->query($sql,array($device_id,$temp_result['id'],4));
+                }
+                else{
+                    ;
+                }
+            }
+            return 1;
+        }
+    }
+
+    function get_device_sms_records($device_id){
+        $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
+        $query = $this->db->query($sql,array($device_id,4)); 
+        if($query->num_rows() == 0){
+            return array();
+        }
+        else{
+            $sms_records = array();
+            $temp_results = $query->result_array();
+            foreach($temp_results as $temp_result){
+                $sql = 'select phoneNumber,time,type,content from phone_sms_record where id = ?';
+                $query = $this->db->query($sql,array($temp_result['info_id'])); 
+                $temp = $query->row_array();
+                array_push($sms_records,$temp);
+            }
+            return $sms_records;
         }
     }
     
