@@ -39,8 +39,8 @@
                 
                 <div id="map-canvas" style="width: 350px; height: 280px" align="center"></div>
                 <script type="text/javascript"> 
-                    var markers;
-                    var center;
+                    markers = new Array();
+                    center = new Array();
                     $(document).ready(function(){
                         if(document.URL.indexOf("index.php") > -1)
                             base_url = document.URL.slice(0,document.URL.indexOf("index.php"));
@@ -58,6 +58,7 @@
                             */
                                 markers = data["locations"];
                                 center = data["center"];
+                                initialize();
                             },
                             dataType: "json"
                         });//end of $.ajax
@@ -93,7 +94,7 @@
                         }
                     }
 
-                    google.maps.event.addDomListener(window, 'load', initialize);
+                    //google.maps.event.addDomListener(window, 'load', initialize);
                 </script>
                 
                 <table class="table table-hover">

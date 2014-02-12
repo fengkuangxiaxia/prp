@@ -57,8 +57,8 @@ class Home extends CI_Controller {
         */
         
         //echo site_url();
-        $this->load->view('_header',$header);
         $this->load->view('_include');
+        $this->load->view('_header',$header);      
 		$this->load->view('command',$data);
 	}
 	/**
@@ -97,8 +97,8 @@ class Home extends CI_Controller {
         $header['device_status'] = '';
         $header['command_status'] = '';
         $header['add_status'] = 'class="active"';
-        $this->load->view('_header',$header);
         $this->load->view('_include');
+        $this->load->view('_header',$header);      
         $this->load->view('add',$data);
     }
     
