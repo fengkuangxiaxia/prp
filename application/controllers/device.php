@@ -41,8 +41,8 @@ class Device extends CI_Controller {
         
         $data['results'] = $this->device_model->get_all_devices($num,$config['per_page']);
         
-        $this->load->view('_header',$header);
         $this->load->view('_include');
+        $this->load->view('_header',$header);
 		$this->load->view('device',$data);
 	}
     
