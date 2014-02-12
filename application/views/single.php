@@ -115,6 +115,63 @@
                     </tbody>
                 </table>
             </div>
+            
+            <div class="panel-heading">
+                <h3 class="panel-title">通话记录</h3>
+            </div>
+            <div class="panel-body">
+                <div class="contacts">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>对象</th>
+                                <th>开始时间</th>
+                                <th>类型</th>
+                                <th>持续时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($calling_records as $row ) {?>
+                            <tr>
+                                <td><?php echo $row['name']; ?></td>
+                                <td><?php echo $row['time']; ?></td>
+                                <td><?php echo $row['type']; ?></td>
+                                <td><?php echo $row['duration']; ?></td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="panel-heading">
+                <h3 class="panel-title">短信记录</h3>
+            </div>
+            <div class="panel-body">
+                <div class="contacts">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>对象</th>
+                                <th>时间</th>
+                                <th>类型</th>
+                                <th>内容</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($sms_records as $row ) {?>
+                            <tr>
+                                <td><?php echo $row['phoneNumber']; ?></td>
+                                <td><?php echo $row['time']; ?></td>
+                                <td><?php echo $row['type']; ?></td>
+                                <td><?php echo $row['content']; ?></td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
         </div>        
        
            

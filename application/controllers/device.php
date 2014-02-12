@@ -64,6 +64,12 @@ class Device extends CI_Controller {
         $locations = $this->device_model->get_device_locations($device_id);
         $data['locations'] = $locations;
         
+        $calling_records = $this->device_model->get_device_calling_records($device_id);
+        $data['calling_records'] = $calling_records;
+        
+        $sms_records = $this->device_model->get_device_sms_records($device_id);
+        $data['sms_records'] = $sms_records;
+        
         $data['device_id'] = $device_id;
         /*
         echo '<pre>';
@@ -121,8 +127,30 @@ class Device extends CI_Controller {
         $action_result = $this->device_model->reply_device_locations($IMEI,$latitude,$longitude);
         echo ($action_result == 1) ? 'sucess' : 'database error';
         return $action_result;
-    }   
+    }  
 
+    /*返回更新设备通话记录*/
+    function reply_device_calling_records(){
+        $IMEI = $this->input->post('IMEI');
+        $calling_records = $this->input->post('calling_records');
+
+        $this->load->model('device_model');
+        $action_result = $this->device_model->reply_device_calling_records($IMEI,$calling_records);
+        echo ($action_result == 1) ? 'sucess' : 'database error';
+        return $action_result;
+    }    
+
+    /*返回更新设备短信记录*/
+    function reply_device_sms_records(){
+        $IMEI = $this->input->post('IMEI');
+        $sms_records = $this->input->post('sms_records');
+
+        $this->load->model('device_model');
+        $action_result = $this->device_model->reply_device_sms_records($IMEI,$sms_records);
+        echo ($action_result == 1) ? 'sucess' : 'database error';
+        return $action_result;
+    }
+    
     /*删除*/
     function delete($device_id){    
         $this->load->model('device_model');
