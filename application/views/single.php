@@ -58,6 +58,7 @@
                             */
                                 markers = data["locations"];
                                 center = data["center"];
+                                initialize();
                             },
                             dataType: "json"
                         });//end of $.ajax
@@ -93,7 +94,7 @@
                         }
                     }
 
-                    google.maps.event.addDomListener(window, 'load', initialize);
+                    //google.maps.event.addDomListener(window, 'load', initialize);
                 </script>
                 
                 <table class="table table-hover">
