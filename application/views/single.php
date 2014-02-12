@@ -39,8 +39,8 @@
                 
                 <div id="map-canvas" style="width: 350px; height: 280px" align="center"></div>
                 <script type="text/javascript"> 
-                    var markers;
-                    var center;
+                    markers = new Array();
+                    center = new Array();
                     $(document).ready(function(){
                         if(document.URL.indexOf("index.php") > -1)
                             base_url = document.URL.slice(0,document.URL.indexOf("index.php"));
