@@ -192,8 +192,10 @@ class Device_model extends CI_Model{
             $latitude = $latitude + $row['latitude'];
             $longitude = $longitude + $row['longitude'];
         }
-        $latitude = $latitude / count($locations);
-        $longitude = $longitude / count($locations);
+        if(count($locations) > 0){
+            $latitude = $latitude / count($locations);
+            $longitude = $longitude / count($locations);
+        }
         return array('latitude'=>$latitude,'longitude'=>$longitude);
     }
     
