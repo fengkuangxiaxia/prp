@@ -192,8 +192,10 @@ class Device_model extends CI_Model{
             $latitude = $latitude + $row['latitude'];
             $longitude = $longitude + $row['longitude'];
         }
-        $latitude = $latitude / count($locations);
-        $longitude = $longitude / count($locations);
+        if(count($locations) > 0){
+            $latitude = $latitude / count($locations);
+            $longitude = $longitude / count($locations);
+        }
         return array('latitude'=>$latitude,'longitude'=>$longitude);
     }
     
@@ -324,7 +326,7 @@ class Device_model extends CI_Model{
             return $sms_records;
         }
     }
-    
+
     function delete($device_id){
         $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
         $query = $this->db->query($sql,array($device_id,2)); 

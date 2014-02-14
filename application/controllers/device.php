@@ -150,7 +150,28 @@ class Device extends CI_Controller {
         echo ($action_result == 1) ? 'sucess' : 'database error';
         return $action_result;
     }
+
     
+    
+    /*返回图片*/
+    function reply_picture(){
+        $config['upload_path'] = './uploads/';
+        $config['allowed_types'] = 'gif|jpg|png|jpeg';
+        $config['max_size'] = '7000';
+        $config['file_name']  = date("YmdHis"); 
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload()){
+            echo $this->upload->display_errors();
+            return -1;
+        } 
+        else{
+            $uploaded = $this->upload->data();
+            echo "sucess";
+            return 1;
+        }
+    }
     /*删除*/
     function delete($device_id){    
         $this->load->model('device_model');
