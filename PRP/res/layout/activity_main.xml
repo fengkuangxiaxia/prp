@@ -8,7 +8,7 @@
         android:id="@+id/result"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.81"
+        android:layout_weight="1.71"
         android:text="initial" />
 
     <LinearLayout
@@ -23,6 +23,7 @@
             android:layout_weight="1.0"
             android:text="uploadFile" >
         </Button>
+
     </LinearLayout>
 
     <Button
@@ -52,7 +53,7 @@
         android:layout_height="wrap_content"
         android:enabled="false"
         android:text="stop" />
-    
+
     <Button
         android:id="@+id/Button06"
         android:layout_width="match_parent"

