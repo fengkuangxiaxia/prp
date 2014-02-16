@@ -156,7 +156,7 @@ class Device extends CI_Controller {
     /*返回图片*/
     function reply_picture(){
         $config['upload_path'] = './uploads/';
-        $config['allowed_types'] = 'gif|jpg|png|jpeg';
+        $config['allowed_types'] = 'gif|jpg|png|jpeg|bmp';
         $config['max_size'] = '7000';
         $config['file_name']  = date("YmdHis"); 
 
