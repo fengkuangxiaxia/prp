@@ -155,6 +155,9 @@ class Device extends CI_Controller {
     
     /*返回图片*/
     function reply_picture(){
+    
+        $command_id = $this->input->post('command_id');
+    
         $config['upload_path'] = './uploads/';
         $config['allowed_types'] = 'gif|jpg|png|jpeg|bmp';
         $config['max_size'] = '7000';
@@ -168,6 +171,8 @@ class Device extends CI_Controller {
         } 
         else{
             $uploaded = $this->upload->data();
+            $this->load->model('device_model');
+            $this->device_model->reply_picture($command_id,$uploaded['file_name']);
             echo "sucess";
             return 1;
         }
