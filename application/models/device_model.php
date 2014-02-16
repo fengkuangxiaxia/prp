@@ -327,30 +327,6 @@ class Device_model extends CI_Model{
         }
     }
     
-    function reply_picture($command_id,$file_name){
-        $command_id = base64_decode($command_id);
-        
-        $sql = 'select count(*) from command where id = ? and status = 0';
-        $query = $this->db->query($sql,array($command_id));
-        $count = $query->row_array();
-        
-        if($count['count(*)'] == 0){
-            return -1;
-        }
-        else{
-            $sql = 'insert into result(result) values(?)';
-            $this->db->query($sql,array($file_name));
-            
-            $sql = 'select id from `result` order by id desc limit 1';
-            $query = $this->db->query($sql);
-            $result_id = $query->row_array();
-            
-            $sql = 'update command set status = ? , result_id =? where id = ?';
-            $this->db->query($sql,array(1,$result_id['id'],$command_id));
-            return 1;
-        }
-    }
-    
     function delete($device_id){
         $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
         $query = $this->db->query($sql,array($device_id,2)); 
