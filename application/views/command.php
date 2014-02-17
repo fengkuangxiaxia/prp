@@ -20,7 +20,13 @@
                         <tr>
                             <td><?php echo $row['command']; ?></td>
                             <td><?php echo $row['status']; ?></td>
-                            <td><?php echo $row['result']; ?></td>
+                            <td>
+                                <?php if ($row['result'] == '暂无结果'){ ?>
+                                    <?php echo $row['result']; ?></td>
+                                <?php } else{?>
+                                    <a class="fancybox" rel="commandimage" href="<?php echo base_url()?>uploads/<?php echo $row['result'];?>" title="">查看图片</a>                       
+                                <?php } ?>
+                            </td>
                         </tr>
                         <?php } ?>
                     </tbody>
