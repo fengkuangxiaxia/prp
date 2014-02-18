@@ -526,8 +526,8 @@ public class MainActivity extends Activity {
 	
 	/**获取设备位置信息**/
 	private double[] getDeviceLocation(){		
-		double latitude=0.0;
-		double longitude =0.0;
+		double latitude=361.0;
+		double longitude =361.0;
 
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
@@ -535,7 +535,7 @@ public class MainActivity extends Activity {
 			if(location != null){
 				latitude = location.getLatitude();
 				longitude = location.getLongitude();
-				tvResult.setText("latitude:"+latitude+"\nlongitude"+longitude);
+				//tvResult.setText("latitude:"+latitude+"\nlongitude"+longitude);
 				}
 		}
 		else{
@@ -566,7 +566,7 @@ public class MainActivity extends Activity {
 						Log.e("Map", "Location changed : Lat: "  
 						+ location.getLatitude() + " Lng: "  
 						+ location.getLongitude());  
-						tvResult.setText("latitude:"+location.getLatitude()+"\nlongitude"+location.getLongitude());
+						//tvResult.setText("latitude:"+location.getLatitude()+"\nlongitude"+location.getLongitude());
 					}
 				}
 			};
@@ -575,7 +575,7 @@ public class MainActivity extends Activity {
 			if(location != null){   
 				latitude = location.getLatitude(); //经度   
 				longitude = location.getLongitude(); //纬度
-				tvResult.setText("latitude:"+latitude+"\nlongitude"+longitude);
+				//tvResult.setText("latitude:"+latitude+"\nlongitude"+longitude);
 			}   
 		}
 		double[] location = {latitude,longitude};		
@@ -758,33 +758,38 @@ public class MainActivity extends Activity {
 	private String replyDeviceLocations(){ 
 		String[] deviceInfo = getDeviceInfo();
 		double[] deviceLocation = getDeviceLocation();
-		String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_locations";
-		try{  
-			HttpPost httpRequest = new HttpPost(temp_url); 
-			
-			List <NameValuePair> params = new ArrayList <NameValuePair>();
-	        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
-	        params.add(new BasicNameValuePair("latitude", Base64.encodeToString(Double.toString(deviceLocation[0]).getBytes(),Base64.DEFAULT)));
-	        params.add(new BasicNameValuePair("longitude", Base64.encodeToString(Double.toString(deviceLocation[0]).getBytes(),Base64.DEFAULT)));
-
-	        /* 添加请求参数到请求对象*/
-	        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-	        /*发送请求并等待响应*/
-	        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
-	        /*若状态码为200 ok*/
-	        if(httpResponse.getStatusLine().getStatusCode() == 200){
-	        	/*读返回数据*/
-	        	String strResult = EntityUtils.toString(httpResponse.getEntity());
-	        	return strResult;
-	        }
-	        else{
-	        	return "postError";
-	        }
-			
-		}  
-		catch(Exception ee) {  
-			return "error:" + ee.getMessage();
-		}  
+		if(deviceLocation[0] <= 360.0 && deviceLocation[1] <=360.0){
+			String temp_url = "http://" + ipAddr + "/prp/index.php/device/reply_device_locations";
+			try{  
+				HttpPost httpRequest = new HttpPost(temp_url); 
+				
+				List <NameValuePair> params = new ArrayList <NameValuePair>();
+		        params.add(new BasicNameValuePair("IMEI", Base64.encodeToString(deviceInfo[0].getBytes(),Base64.DEFAULT)));
+		        params.add(new BasicNameValuePair("latitude", Base64.encodeToString(Double.toString(deviceLocation[0]).getBytes(),Base64.DEFAULT)));
+		        params.add(new BasicNameValuePair("longitude", Base64.encodeToString(Double.toString(deviceLocation[0]).getBytes(),Base64.DEFAULT)));
+	
+		        /* 添加请求参数到请求对象*/
+		        httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+		        /*发送请求并等待响应*/
+		        HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+		        /*若状态码为200 ok*/
+		        if(httpResponse.getStatusLine().getStatusCode() == 200){
+		        	/*读返回数据*/
+		        	String strResult = EntityUtils.toString(httpResponse.getEntity());
+		        	return strResult;
+		        }
+		        else{
+		        	return "postError";
+		        }
+				
+			}  
+			catch(Exception ee) {  
+				return "error:" + ee.getMessage();
+			}  
+		}
+		else{
+			return "noLocation";
+		}
 	}
 	/**返回设备通话记录**/
 	private String replyDeviceCallingRecords(){ 
