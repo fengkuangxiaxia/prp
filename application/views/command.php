@@ -11,6 +11,7 @@
                     <thead>
                         <tr>
                             <th>命令</th>
+                            <th>对象</th>
                             <th>状态</th>
                             <th>结果</th>
                         </tr>
@@ -18,7 +19,14 @@
                     <tbody>
                         <?php foreach ($results as $row ) {?>
                         <tr>
-                            <td><?php echo $row['command']; ?></td>
+                            <td><?php echo $row['command_type']; ?></td>
+                            <td>
+                                <?php if ($row['target_id'] == '错误'){ ?>
+                                    <?php echo $row['target_IMEI']; ?>
+                                <?php } else{?>
+                                    <a href="<?php echo site_url('device/single/').'/'.$row['target_id'] ?>"><?php echo $row['target_IMEI']?></a>
+                                <?php } ?>
+                            </td>
                             <td><?php echo $row['status']; ?></td>
                             <td>
                                 <?php if ($row['result'] == '暂无结果'){ ?>
