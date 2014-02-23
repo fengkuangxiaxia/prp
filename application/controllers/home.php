@@ -93,6 +93,8 @@ class Home extends CI_Controller {
     //添加命令的编辑页面    
     public function add(){
         $data['title'] = '增加命令';
+        $this->load->model('home_model');
+        $data['IMEI'] = $this->home_model->get_all_IMEI();
         $header['admin'] = $this->session->userdata('admin');
         $header['device_status'] = '';
         $header['command_status'] = '';
@@ -105,7 +107,7 @@ class Home extends CI_Controller {
     //添加命令的函数
     public function add_command(){
         $this->load->model('add_command_model');
-        if(empty($_POST['command_type']) or empty($_POST['target']) or($_POST['command_type'] == 0)){
+        if(empty($_POST['command_type']) or empty($_POST['target']) or($_POST['command_type'] == 0) or($_POST['target'] == 0)){
             redirect(site_url('home/add'));
         }
         $this->add_command_model->add_command($_POST['command_type'],$_POST['target']);
