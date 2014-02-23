@@ -29,7 +29,8 @@
                             <td><?php echo $row['system']; ?></td>
                             <td><?php echo $row['updateAt']; ?></td>
                             <td>
-                                <a href="<?php echo site_url('device/single/').'/'.$row['id'] ?>">查看</a>    
+                                <a href="<?php echo site_url('device/single/').'/'.$row['id'] ?>">查看</a>  
+                                <a href="<?php echo site_url('home/add/').'/'.$row['IMEI'] ?>">命令</a>                                   
                                 <a href="<?php echo site_url('device/delete/').'/'.$row['id'] ?>">删除</a> 
                             </td>
                         </tr>

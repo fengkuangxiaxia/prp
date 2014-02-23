@@ -91,8 +91,9 @@ class Home extends CI_Controller {
 	}
     
     //添加命令的编辑页面    
-    public function add(){
+    public function add($default_IMEI = '-1'){
         $data['title'] = '增加命令';
+        $data['default_IMEI'] = $default_IMEI;
         $this->load->model('home_model');
         $data['IMEI'] = $this->home_model->get_all_IMEI();
         $header['admin'] = $this->session->userdata('admin');
