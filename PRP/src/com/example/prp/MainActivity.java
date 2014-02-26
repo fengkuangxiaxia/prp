@@ -108,7 +108,7 @@ public class MainActivity extends Activity {
 			    					default:data = "invalidCommand";break;
 			    				}
 			    				
-			    				if(data != "invalidCommand"){
+			    				if(!data.equals("invalidCommand")){
 			    					//result = data;
 			    					flag = flag | true;
 			    				}
