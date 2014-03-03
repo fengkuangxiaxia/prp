@@ -23,7 +23,7 @@ class Command_model extends CI_Model{
                 $target_id = $this->get_id_by_IMEI($command[1]);
                 $target_IMEI = ($target_id == '错误') ? '错误' : $command[1];
                 $status = ($row['status'] == 1) ? '完成' : '未完成';
-                $phoneNumber = str_replace("-","",$temp[1]);
+                //$phoneNumber = str_replace("-","",$temp[1]);
                 
                 
                 $result[] = array('command_type' => $command_type,'target_id' => $target_id,'target_IMEI' => $target_IMEI,'status' => $status,'result' => $row['result']);
