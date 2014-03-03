@@ -10,6 +10,7 @@ class Device_model extends CI_Model{
                 3:   通话记录 phone_calling_record表
                 4:   短信记录 phone_sms_record表
         */
+        $tables = array(1 => 'phone_contact',2 => 'phone_location',3 => 'phone_calling_record',4 => 'phone_sms_record');
 	}
     
     public function get_all_devices($num,$offset){
@@ -328,16 +329,38 @@ class Device_model extends CI_Model{
     }
     
     function delete($device_id){
-        $sql = 'select info_id from info_table where device_id = ? and info_type = ?';
-        $query = $this->db->query($sql,array($device_id,2)); 
+        $tables = array(1 => 'phone_contact',2 => 'phone_location',3 => 'phone_calling_record',4 => 'phone_sms_record');
+        
+        $sql = 'SELECT info_id,info_type FROM `info_table` AS A WHERE (1 = (SELECT count(info_id) FROM info_table AS B WHERE A.info_id = B.info_id AND A.info_type = B.info_type)) AND device_id = ?';
+        $query = $this->db->query($sql,array($device_id)); 
         $temp = $query->result_array();
         foreach($temp as $row){
-            $sql = 'delete from phone_location where id = ?';
-            $query = $this->db->query($sql,array($row['info_id']));     
+            $sql = 'delete from `' . $tables[$row['info_type']] . '` where id = ?';
+            $query = $this->db->query($sql,array($row['info_id']));  
+            $sql = 'delete from `info_table` where device_id = ? and info_id = ? and info_type = ?';
+            $query = $this->db->query($sql,array($device_id,$row['info_id'],$row['info_type']));  
         }
-        
-        $sql = 'delete from info_table where device_id = ?';
+        $sql = 'select IMEI from device where id = ?';
         $query = $this->db->query($sql,array($device_id)); 
+        
+        $temp = $query->row_array();
+        $IMEI = $temp['IMEI'];
+        $sql = 'select result_id from command where command like ? and status <> 0';
+        $query = $this->db->query($sql,array('%:'.$IMEI)); 
+        $temp = $query->result_array();
+        foreach($temp as $row){
+            $sql = 'select result from result where id = ?';
+            $query = $this->db->query($sql,array($row['result_id']));
+            $file = $query->row_array();
+            $myfile = './uploads/'.$file['result'];
+            if (file_exists($myfile)){
+                $result=unlink ($myfile);
+            }
+            $sql = 'delete from result where id = ?';
+            $query = $this->db->query($sql,array($row['result_id'])); 
+        }
+        $sql = 'delete from command where command like ?';
+        $query = $this->db->query($sql,array('%:'.$IMEI)); 
         
         $sql = 'delete from device where id = ?';
         $query = $this->db->query($sql,array($device_id)); 
