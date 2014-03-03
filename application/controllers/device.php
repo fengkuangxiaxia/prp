@@ -173,7 +173,9 @@ class Device extends CI_Controller {
             $uploaded = $this->upload->data();
             $this->load->model('client_command_model');
             $this->client_command_model->reply_command(base64_decode($command_id),$uploaded['file_name']);
-            echo "sucess";
+            echo '<pre>';
+            print_r($uploaded);
+            echo '</pre>';
             return 1;
         }
     }
