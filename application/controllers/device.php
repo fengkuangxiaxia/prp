@@ -159,7 +159,7 @@ class Device extends CI_Controller {
         $command_id = $this->input->post('command_id');
     
         $config['upload_path'] = './uploads/';
-        $config['allowed_types'] = 'gif|jpg|png|jpeg|bmp';
+        $config['allowed_types'] = '*';
         $config['max_size'] = '7000';
         $config['file_name']  = date("YmdHis"); 
 
