@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2014 年 02 月 12 日 04:11
+-- 生成日期: 2014 年 03 月 03 日 06:31
 -- 服务器版本: 5.5.24-log
 -- PHP 版本: 5.4.3
 
@@ -53,14 +53,6 @@ CREATE TABLE IF NOT EXISTS `command` (
   `result_id` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;
-
---
--- 转存表中的数据 `command`
---
-
-INSERT INTO `command` (`id`, `command`, `status`, `result_id`) VALUES
-(3, '1:测试', 0, 1),
-(4, '1:123456', 0, 1);
 
 -- --------------------------------------------------------
 
